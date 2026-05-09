@@ -3,11 +3,16 @@ import { MailOutlined, LockOutlined, SafetyCertificateOutlined } from '@ant-desi
 import { useNavigate } from 'react-router';
 import { useRequest } from 'ahooks';
 import { getCaptchaRequest, loginRequest } from '@/service/userService';
-import { getSessionStorage, removeSessionStorage, setSessionStorage, setLocalStorage } from '@/utils';
+import {
+  getSessionStorage,
+  removeSessionStorage,
+  setSessionStorage,
+  setLocalStorage
+} from '@/utils';
 
 const { Title } = Typography;
 
-const Index = () => {
+export const Component = () => {
   const navigate = useNavigate();
 
   const {
@@ -34,7 +39,7 @@ const Index = () => {
         setLocalStorage('user', data);
         setLocalStorage('token', data.token);
         removeSessionStorage('captchaKey');
-        navigate('/home', { replace: true });
+        navigate('/', { replace: true });
       }
     },
     onError: () => refreshCaptchaAsync,
@@ -107,5 +112,3 @@ const Index = () => {
     </Flex>
   );
 };
-
-export default Index;

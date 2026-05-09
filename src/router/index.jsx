@@ -1,25 +1,37 @@
-import { getLocalStorage } from '@/utils';
 import { Result } from 'antd';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import { createBrowserRouter, RouterProvider } from 'react-router';
+import { GlobalError, GlobalLoading } from '@/components';
 
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: <Navigate to={getLocalStorage('token') ? '/home' : '/login'} replace />
-  },
-  {
-    path: '/login',
-    lazy: () =>
-      import('@/pages/Login').then((module) => ({
-        Component: module.default
-      }))
-  },
-  {
-    path: '/home',
-    lazy: () =>
-      import('@/pages/Home').then((module) => ({
-        Component: module.default
-      }))
+    id: 'root',
+    HydrateFallback: GlobalLoading,
+    ErrorBoundary: GlobalError,
+    children: [
+      {
+        path: '/login',
+        lazy: () => import('@/pages/Login')
+      },
+      {
+        path: '/',
+        lazy: () => import('@/layout'),
+        children: [
+          {
+            ErrorBoundary: GlobalError,
+            children: [
+              {
+                index: true,
+                lazy: () => import('@/pages/Home')
+              },
+              {
+                path: 'edit/:docId',
+                lazy: () => import('@/pages/Editor')
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     path: '*',
