@@ -1,3 +1,3 @@
 export { default as request } from './request';
 export * from './storage';
-export { getAvatarColor } from './color';
+export * from './color';

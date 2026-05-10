@@ -1,0 +1,76 @@
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+
+  // 编辑区外层
+  .editor-content-area {
+    flex: 1;
+    overflow-y: auto;
+
+    // TipTap 编辑区域类名
+    .ProseMirror {
+      padding: 40px 60px;
+      min-height: 100%;
+      outline: none;
+
+      p {
+        margin: 1em 0;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      h2 {
+        font-size: 1.5em;
+      }
+
+      ul,
+      ol {
+        padding-left: 1.5em;
+      }
+
+      blockquote {
+        border-left: 3px solid #ccc;
+        padding-left: 1em;
+        color: #666;
+      }
+    }
+  }
+
+  .status-footer {
+    padding: 4px 12px;
+    font-size: 12px;
+    border-top: 1px solid #f0f0f0;
+    color: #999;
+    background: #fafafa;
+  }
+}
+
+// 协作光标样式 (必须全局或放在这里)
+.collaboration-cursor__caret {
+  position: relative;
+  border-left: 2px solid;
+  border-right: 2px solid;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+}
+
+.collaboration-cursor__label {
+  position: absolute;
+  top: -1.4em;
+  left: -2px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  user-select: none;
+  color: #fff;
+  padding: 2px 4px;
+  border-radius: 3px 3px 3px 0;
+  white-space: nowrap;
+}

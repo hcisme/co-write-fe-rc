@@ -13,13 +13,15 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // '/api/internal': {
-      //   target: 'http://127.0.0.1:3000',
-      //   changeOrigin: true
-      // },
       '/api': {
-        target: 'http://127.0.0.1:8080',
+        target: 'http://localhost:8080',
         changeOrigin: true
+      },
+      '/ws-api': {
+        target: 'ws://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ws-api/, '')
       }
     }
   }
