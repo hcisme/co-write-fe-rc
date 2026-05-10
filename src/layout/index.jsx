@@ -1,6 +1,5 @@
 import { Navigate, Outlet } from 'react-router';
 import { Layout } from 'antd';
-import Header from './Header';
 import Sider from './Sider';
 import { getLocalStorage } from '@/utils';
 
@@ -15,19 +14,11 @@ export const Component = () => {
 
   return (
     <Layout style={{ height: '100%' }}>
-      <Header />
+      <Sider />
 
-      <Layout>
-        <Sider />
-
-        <Content
-          style={{
-            backgroundColor: '#0958d9'
-          }}
-        >
-          <Outlet />
-        </Content>
-      </Layout>
+      <Content>
+        <Outlet />
+      </Content>
     </Layout>
   );
 };
