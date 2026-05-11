@@ -1,13 +1,14 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
-import { Badge, Flex, Space, Typography } from 'antd';
-import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
-import { EditorContent, useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { Avatar, Badge, Button, Card, Col, Flex, Row, Tooltip, Typography } from 'antd';
+import { UserAddOutlined } from '@ant-design/icons';
 import { useCollaborationV2 } from '@/hooks';
-import { getLocalStorage, stringToColor } from '@/utils';
-import { EditorToolbar, GlobalLoading } from '@/components';
+import { getLocalStorage } from '@/utils';
+import { GlobalLoading } from '@/components';
+import TiptapEditor from './TiptapEditor';
+import AddCollaboratorModal from './AddCollaboratorModal';
+import { useRequest } from 'ahooks';
+import { checkPermission } from '@/service/docService';
 import './index.less';
 
 const { Text } = Typography;
@@ -20,67 +21,107 @@ export const Component = () => {
     docId,
     userId: user.id,
     username: user.username,
+    email: user.email,
     token
   });
+  const [users, setUsers] = useState([]);
+
+  const { data: { data: permissionData = {} } = {} } = useRequest(
+    () => checkPermission({ docId }),
+    {
+      refreshDeps: [docId]
+    }
+  );
+
+  useEffect(() => {
+    if (!provider) return;
+
+    const updateUsers = () => {
+      const states = provider.awareness.getStates();
+      const userList = [];
+      states.forEach((state, clientId) => {
+        if (state.user) {
+          userList.push({ clientId, ...state.user });
+        }
+      });
+      const uniqueUsers = Array.from(new Map(userList.map((u) => [u.name, u])).values());
+      setUsers(uniqueUsers);
+    };
+
+    provider.awareness.on('change', updateUsers);
+    updateUsers();
+
+    return () => {
+      provider.awareness.off('change', updateUsers);
+    };
+  }, [provider]);
 
   if (!ydoc || !provider) {
     return <GlobalLoading />;
   }
 
   return (
-    <TiptapEditor
-      ydoc={ydoc}
-      provider={provider}
-      status={status}
-      userId={user.id}
-      username={user.username}
-    />
-  );
-};
+    <Row style={{ height: '100%' }}>
+      <Col span={20}>
+        <TiptapEditor
+          ydoc={ydoc}
+          provider={provider}
+          status={status}
+          userId={user.id}
+          username={user.username}
+          onlineCount={users.length}
+          role={permissionData.role}
+        />
+      </Col>
 
-const TiptapEditor = ({ ydoc, provider, status, userId, username }) => {
-  const editor = useEditor(
-    {
-      extensions: [
-        StarterKit.configure({
-          history: false
-        }),
-        Collaboration.configure({
-          document: ydoc
-        }),
-        CollaborationCursor.configure({
-          provider: provider,
-          user: {
-            name: username,
-            color: stringToColor(userId)
-          }
-        })
-      ]
-    },
-    [ydoc, provider]
-  );
+      <Col span={4}>
+        <Flex
+          vertical
+          gap={16}
+          style={{ height: '100%', padding: 16, borderLeft: '1px solid #f0f0f0' }}
+        >
+          <Flex justify="space-between" align="center">
+            <Badge count={users.length} size="small" offset={[8, 0]}>
+              <Text strong>在线用户</Text>
+            </Badge>
+            {permissionData.role !== 2 && (
+              <Tooltip title="添加协作者">
+                <AddCollaboratorModal>
+                  <Button type="text" icon={<UserAddOutlined />} size="small" />
+                </AddCollaboratorModal>
+              </Tooltip>
+            )}
+          </Flex>
 
-  if (!editor) return null;
-
-  return (
-    <div className="editor-container">
-      <EditorToolbar editor={editor} />
-
-      <div className="editor-content-area">
-        <EditorContent editor={editor} />
-      </div>
-
-      <Flex className="status-footer" justify="space-between" align="center">
-        <Space align="center">
-          <Badge status={status === 'connected' ? 'success' : 'error'} />
-          <Text type={status === 'connected' ? 'success' : 'danger'} style={{ fontSize: 12 }}>
-            {status === 'connected' ? '服务已连接' : '正在尝试连接服务器...'}
-          </Text>
-        </Space>
-        <Text type="secondary" style={{ fontSize: 12 }}>
-          在线人数: {provider?.awareness.getStates().size || 0}
-        </Text>
-      </Flex>
-    </div>
+          <Flex vertical gap={12} style={{ flex: 1, overflowY: 'auto' }}>
+            {users.map((u) => {
+              const isSelf = u.email === user.email;
+              const card = (
+                <Card key={u.clientId} size="small" hoverable>
+                  <Flex align="center" gap={8}>
+                    <Avatar size="small" style={{ backgroundColor: u.color }}>
+                      {u.name.charAt(0)}
+                    </Avatar>
+                    <Flex vertical>
+                      <Text ellipsis>{u.name}</Text>
+                      <Text ellipsis type="secondary" style={{ fontSize: 12 }}>
+                        {u.email}
+                      </Text>
+                    </Flex>
+                  </Flex>
+                </Card>
+              );
+              return isSelf ? (
+                <div key={u.clientId} style={{ paddingRight: 12 }}>
+                  <Badge.Ribbon text="自己">{card}</Badge.Ribbon>
+                </div>
+              ) : (
+                card
+              );
+            })}
+          </Flex>
+        </Flex>
+      </Col>
+    </Row>
   );
 };

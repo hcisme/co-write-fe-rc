@@ -16,7 +16,12 @@ const Index = (props) => {
   };
 
   return (
-    <ModalForm formProps={{ layout: 'vertical' }} triggerElement={children} onFinish={onFinish}>
+    <ModalForm
+      modalProps={{ title: '新建文档' }}
+      formProps={{ layout: 'vertical' }}
+      triggerElement={children}
+      onFinish={onFinish}
+    >
       <>
         <Form.Item
           label="文档标题"

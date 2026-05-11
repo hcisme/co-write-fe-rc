@@ -11,7 +11,7 @@ import {
   Tree,
   Typography
 } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import AddDocModal from '../AddDocModal';
 import { useDocStore } from '@/store/useDocStore';
 import { getAvatarColor, getLocalStorage, removeLocalStorage } from '@/utils';
@@ -32,7 +32,7 @@ const Index = () => {
   const selectedKeys = docId ? [docId] : [];
   const { username = '', email = '', id = '' } = getLocalStorage('user') || {};
   // doc 列表数据
-  const { docsData, fetchDocsData } = useDocStore();
+  const { docsData, fetchDocsData, loading: docsLoading } = useDocStore();
   const myDocs = docsData.filter((doc) => doc.userId === doc.ownerId);
   const joinedDocs = docsData.filter((doc) => doc.userId !== doc.ownerId);
 
@@ -104,12 +104,19 @@ const Index = () => {
       }}
     >
       <Flex vertical gap={16} style={{ height: '100%' }}>
-        <Flex>
+        <Flex gap={16}>
           <AddDocModal onSuccess={fetchDocsData}>
             <Button type="primary" icon={<PlusOutlined />} block>
               创建文档
             </Button>
           </AddDocModal>
+
+          <Button
+            shape="circle"
+            icon={<ReloadOutlined />}
+            onClick={fetchDocsData}
+            loading={docsLoading}
+          />
         </Flex>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>

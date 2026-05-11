@@ -4,14 +4,7 @@ import AppRouter from '@/router';
 
 const Index = () => {
   return (
-    <ConfigProvider
-      locale={zhCN}
-      theme={{
-        token: {
-          borderRadius: 2
-        }
-      }}
-    >
+    <ConfigProvider locale={zhCN}>
       <AntdApp style={{ height: '100%' }}>
         <AppRouter />
       </AntdApp>

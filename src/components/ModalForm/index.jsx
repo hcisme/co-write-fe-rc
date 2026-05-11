@@ -51,7 +51,6 @@ const Index = (props) => {
         })}
 
       <Modal
-        title="新建文档"
         open={open}
         onCancel={onClosed}
         onOk={onOk}

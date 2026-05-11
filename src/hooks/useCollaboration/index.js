@@ -61,7 +61,7 @@ const collaborationReducer = (state, action) => {
   }
 };
 
-export const useCollaborationV2 = ({ docId, userId, username, token }) => {
+export const useCollaborationV2 = ({ docId, userId, username, email, token }) => {
   const [state, dispatch] = useReducer(collaborationReducer, {
     ydoc: null,
     provider: null,
@@ -93,9 +93,10 @@ export const useCollaborationV2 = ({ docId, userId, username, token }) => {
     if (!state.provider) return;
     state.provider.awareness.setLocalStateField('user', {
       name: username,
-      color: stringToColor(userId)
+      color: stringToColor(userId),
+      email
     });
-  }, [state.provider, username, userId]);
+  }, [state.provider, username, userId, email]);
 
   return state;
 };
