@@ -3,12 +3,12 @@ import { useParams } from 'react-router';
 import { Avatar, Badge, Button, Card, Col, Flex, Row, Tooltip, Typography } from 'antd';
 import { UserAddOutlined } from '@ant-design/icons';
 import { useCollaborationV2 } from '@/hooks';
-import { getLocalStorage } from '@/utils';
+import { getLocalStorage, roleMap, stringToColor } from '@/utils';
 import { GlobalLoading } from '@/components';
 import TiptapEditor from './TiptapEditor';
-import AddCollaboratorModal from './AddCollaboratorModal';
+import EditCollaboratorModal from './EditCollaboratorDrawer';
 import { useRequest } from 'ahooks';
-import { checkPermission } from '@/service/docService';
+import { checkPermission, getDocMember } from '@/service/docService';
 import './index.less';
 
 const { Text } = Typography;
@@ -28,6 +28,12 @@ export const Component = () => {
 
   const { data: { data: permissionData = {} } = {} } = useRequest(
     () => checkPermission({ docId }),
+    {
+      refreshDeps: [docId]
+    }
+  );
+  const { data: { data: memberList } = {}, runAsync: fetchMemberList } = useRequest(
+    () => getDocMember({ docId }),
     {
       refreshDeps: [docId]
     }
@@ -71,6 +77,7 @@ export const Component = () => {
           username={user.username}
           onlineCount={users.length}
           role={permissionData.role}
+          onRoleChange={fetchMemberList}
         />
       </Col>
 
@@ -82,41 +89,60 @@ export const Component = () => {
         >
           <Flex justify="space-between" align="center">
             <Badge count={users.length} size="small" offset={[8, 0]}>
-              <Text strong>在线用户</Text>
+              <Text strong>成员</Text>
             </Badge>
             {permissionData.role !== 2 && (
               <Tooltip title="添加协作者">
-                <AddCollaboratorModal>
+                <EditCollaboratorModal edit={false}>
                   <Button type="text" icon={<UserAddOutlined />} size="small" />
-                </AddCollaboratorModal>
+                </EditCollaboratorModal>
               </Tooltip>
             )}
           </Flex>
 
-          <Flex vertical gap={12} style={{ flex: 1, overflowY: 'auto' }}>
-            {users.map((u) => {
-              const isSelf = u.email === user.email;
+          <Flex vertical gap={8} style={{ flex: 1, overflow: 'hidden auto' }}>
+            {(memberList || []).map((item) => {
               const card = (
-                <Card key={u.clientId} size="small" hoverable>
-                  <Flex align="center" gap={8}>
-                    <Avatar size="small" style={{ backgroundColor: u.color }}>
-                      {u.name.charAt(0)}
-                    </Avatar>
-                    <Flex vertical>
-                      <Text ellipsis>{u.name}</Text>
-                      <Text ellipsis type="secondary" style={{ fontSize: 12 }}>
-                        {u.email}
-                      </Text>
-                    </Flex>
-                  </Flex>
-                </Card>
-              );
-              return isSelf ? (
-                <div key={u.clientId} style={{ paddingRight: 12 }}>
-                  <Badge.Ribbon text="自己">{card}</Badge.Ribbon>
+                <div key={item.userId} style={{ paddingRight: 12 }}>
+                  <Badge.Ribbon text={roleMap[item.role]}>
+                    <Card size="small" hoverable>
+                      <Flex align="center" gap={8}>
+                        <Avatar
+                          size="small"
+                          style={{ flexShrink: 0, backgroundColor: stringToColor(item.userId) }}
+                        >
+                          {item.username.charAt(0)}
+                        </Avatar>
+                        <Flex vertical style={{ minWidth: 0 }}>
+                          <Text ellipsis title={item.username}>
+                            {item.username}
+                          </Text>
+                          <Text
+                            ellipsis
+                            type="secondary"
+                            style={{ fontSize: 12 }}
+                            title={item.email}
+                          >
+                            {item.email + '123eadqwrq'}
+                          </Text>
+                        </Flex>
+                      </Flex>
+                    </Card>
+                  </Badge.Ribbon>
                 </div>
-              ) : (
+              );
+
+              return item.role === 0 ? (
                 card
+              ) : (
+                <EditCollaboratorModal
+                  key={item.userId}
+                  edit={true}
+                  initialValues={{ userId: item.userId, role: item.role }}
+                  onSuccess={fetchMemberList}
+                >
+                  {card}
+                </EditCollaboratorModal>
               );
             })}
           </Flex>

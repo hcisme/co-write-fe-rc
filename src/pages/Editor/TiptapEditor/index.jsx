@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Badge, Flex, Space, Typography } from 'antd';
+import { useNavigate } from 'react-router';
+import { App, Badge, Flex, Space, Typography } from 'antd';
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { EditorContent, useEditor } from '@tiptap/react';
@@ -9,7 +10,9 @@ import { EditorToolbar } from '@/components';
 
 const { Text } = Typography;
 
-const Index = ({ ydoc, provider, status, userId, username, onlineCount, role }) => {
+const Index = ({ ydoc, provider, status, userId, username, onlineCount, role, onRoleChange }) => {
+  const { message } = App.useApp();
+  const navigate = useNavigate();
   const editor = useEditor(
     {
       extensions: [
@@ -37,6 +40,35 @@ const Index = ({ ydoc, provider, status, userId, username, onlineCount, role }) 
       editor.setEditable(role !== 2);
     }
   }, [editor, role]);
+
+  useEffect(() => {
+    if (!provider) return;
+
+    const handleMessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'ROLE_UPDATED') {
+          const newRole = data.role;
+          // 实时切换编辑器状态
+          editor.setEditable(newRole !== 2);
+          message.info(`您的权限已更新为: ${newRole === 1 ? '编辑' : '只读'}`, 5);
+        }
+
+        if (data.type === 'AUTH_REVOKED') {
+          message.error('您已被移除协作，即将退出', 5);
+          navigate('/');
+        }
+        onRoleChange?.();
+        // eslint-disable-next-line no-unused-vars
+      } catch (e) {
+        // 忽略
+      }
+    };
+
+    provider.ws.addEventListener('message', handleMessage);
+    return () => provider.ws.removeEventListener('message', handleMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [provider, editor]);
 
   if (!editor) return null;
 

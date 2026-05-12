@@ -14,16 +14,10 @@ import {
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import AddDocModal from '../AddDocModal';
 import { useDocStore } from '@/store/useDocStore';
-import { getAvatarColor, getLocalStorage, removeLocalStorage } from '@/utils';
+import { roleMap, getAvatarColor, getLocalStorage, removeLocalStorage } from '@/utils';
 
 const { Sider } = Layout;
 const { Text } = Typography;
-
-const roleMap = {
-  0: '创建者',
-  1: '可编辑',
-  2: '可预览'
-};
 
 const Index = () => {
   const navigate = useNavigate();

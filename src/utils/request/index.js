@@ -29,7 +29,10 @@ axios.interceptors.response.use(
     }
     return response;
   },
-  (error) => error
+  (error) => {
+    message.warning('服务器错误请联系管理员');
+    return error;
+  }
 );
 
 async function request(url, { method = 'GET', ...rest } = {}) {

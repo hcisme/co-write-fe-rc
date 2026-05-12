@@ -8,5 +8,10 @@ export const createDoc = ({ title }) =>
 export const addCollaborator = ({ docId, userId, role }) =>
   request('/api/doc/share', { method: 'POST', data: { docId, userId, role } });
 
+export const updateCollaborator = ({ docId, userId, role }) =>
+  request('/api/doc/collaborator/role', { method: 'POST', data: { docId, userId, role } });
+
 export const checkPermission = ({ docId }) =>
   request('/api/doc/check-permission', { method: 'POST', data: { docId } });
+
+export const getDocMember = ({ docId }) => request(`/api/doc/collaborators/${docId}`);

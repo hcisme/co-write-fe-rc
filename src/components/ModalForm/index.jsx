@@ -5,7 +5,8 @@ const Index = (props) => {
   const { children, triggerElement, modalProps, formProps, onBeforeOpen, onBeforeClose, onFinish } =
     props;
 
-  const [form] = Form.useForm();
+  const [innerForm] = Form.useForm();
+  const form = formProps.form || innerForm;
   const [open, setOpen] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
 
