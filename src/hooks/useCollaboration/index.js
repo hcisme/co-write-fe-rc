@@ -74,10 +74,26 @@ export const useCollaborationV2 = ({ docId, userId, username, email, token }) =>
       params: { userId, token },
       connect: true
     });
+    // 初始设置一次用户信息
+    p.awareness.setLocalStateField('user', {
+      userId,
+      name: username,
+      color: stringToColor(userId),
+      email
+    });
+
     dispatch({ type: 'SET_INSTANCE', ydoc: doc, provider: p });
 
     const handleStatus = ({ status }) => {
       dispatch({ type: 'SET_STATUS', status });
+      if (status === 'connected') {
+        p.awareness.setLocalStateField('user', {
+          userId,
+          name: username,
+          color: stringToColor(userId),
+          email
+        });
+      }
     };
     p.on('status', handleStatus);
 
@@ -87,16 +103,7 @@ export const useCollaborationV2 = ({ docId, userId, username, email, token }) =>
       doc.destroy();
       dispatch({ type: 'RESET' });
     };
-  }, [docId, userId, token]);
-
-  useEffect(() => {
-    if (!state.provider) return;
-    state.provider.awareness.setLocalStateField('user', {
-      name: username,
-      color: stringToColor(userId),
-      email
-    });
-  }, [state.provider, username, userId, email]);
+  }, [docId, userId, token, username, email]);
 
   return state;
 };

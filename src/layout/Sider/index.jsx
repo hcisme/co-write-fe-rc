@@ -122,11 +122,7 @@ const Index = () => {
               selectable
               blockNode
               onSelect={(keys) => {
-                if (keys.length > 0) {
-                  navigate(`/edit/${keys[0]}`);
-                } else {
-                  navigate('/');
-                }
+                navigate(keys.length > 0 ? `/edit/${keys[0]}` : '/');
               }}
             />
           </ConfigProvider>

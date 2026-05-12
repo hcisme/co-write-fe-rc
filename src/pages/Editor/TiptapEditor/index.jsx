@@ -5,12 +5,22 @@ import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { stringToColor } from '@/utils';
+import { stringToColor, roleMap } from '@/utils';
 import { EditorToolbar } from '@/components';
 
 const { Text } = Typography;
 
-const Index = ({ ydoc, provider, status, userId, username, onlineCount, role, onRoleChange }) => {
+const Index = ({
+  ydoc,
+  provider,
+  status,
+  userId,
+  username,
+  email,
+  onlineCount,
+  role,
+  onRoleChange
+}) => {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const editor = useEditor(
@@ -25,7 +35,9 @@ const Index = ({ ydoc, provider, status, userId, username, onlineCount, role, on
         CollaborationCursor.configure({
           provider: provider,
           user: {
+            userId,
             name: username,
+            email,
             color: stringToColor(userId)
           }
         })
@@ -43,6 +55,8 @@ const Index = ({ ydoc, provider, status, userId, username, onlineCount, role, on
 
   useEffect(() => {
     if (!provider) return;
+    const socket = provider.ws;
+    if (!socket) return;
 
     const handleMessage = (event) => {
       try {
@@ -51,7 +65,7 @@ const Index = ({ ydoc, provider, status, userId, username, onlineCount, role, on
           const newRole = data.role;
           // 实时切换编辑器状态
           editor.setEditable(newRole !== 2);
-          message.info(`您的权限已更新为: ${newRole === 1 ? '编辑' : '只读'}`, 5);
+          message.info(`您的权限已更新为: ${roleMap[newRole]}`, 5);
         }
 
         if (data.type === 'AUTH_REVOKED') {
@@ -65,8 +79,10 @@ const Index = ({ ydoc, provider, status, userId, username, onlineCount, role, on
       }
     };
 
-    provider.ws.addEventListener('message', handleMessage);
-    return () => provider.ws.removeEventListener('message', handleMessage);
+    socket.addEventListener('message', handleMessage);
+    return () => {
+      socket.removeEventListener('message', handleMessage);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider, editor]);
 

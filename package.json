@@ -41,6 +41,7 @@
     "globals": "^17.5.0",
     "less": "^4.6.4",
     "prettier": "3.8.3",
+    "rollup-plugin-visualizer": "^7.0.1",
     "vite": "^8.0.10"
   }
 }
