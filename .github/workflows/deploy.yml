@@ -20,6 +20,10 @@ jobs:
           npm install
           npm run build
 
+      - name: Test Connectivity
+        run: |
+          nc -zv -w 5 ${{ secrets.REMOTE_HOST }} ${{ secrets.REMOTE_PORT }}
+
       - name: Clean Remote Directory (Keep .well-known)
         uses: appleboy/ssh-action@master
         with:
