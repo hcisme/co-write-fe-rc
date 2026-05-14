@@ -7,8 +7,8 @@ export const useDocStore = create((set) => ({
   fetchDocsData: async () => {
     set({ loading: true });
     try {
-      const { data = [] } = (await getDocs()) || {};
-      set({ docsData: data || [] });
+      const { data } = await getDocs();
+      set({ docsData: data ?? [] });
     } finally {
       set({ loading: false });
     }

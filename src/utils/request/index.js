@@ -41,7 +41,7 @@ async function request(url, { method = 'GET', ...rest } = {}) {
     method,
     ...rest
   });
-  return data;
+  return data ?? {};
 }
 
 export default request;

@@ -33,18 +33,7 @@ const Index = () => {
   const menuItems = [
     {
       key: 'logout',
-      label: (
-        <Text
-          type="danger"
-          onClick={() => {
-            removeLocalStorage('user');
-            removeLocalStorage('token');
-            navigate('/login', { replace: true });
-          }}
-        >
-          退出登录
-        </Text>
-      )
+      label: <Text type="danger">退出登录</Text>
     }
   ];
 
@@ -81,6 +70,18 @@ const Index = () => {
       }))
     }
   ];
+
+  const onClickDropdownItem = ({ key }) => {
+    switch (key) {
+      case 'logout':
+        removeLocalStorage('user');
+        removeLocalStorage('token');
+        navigate('/login', { replace: true });
+        break;
+      default:
+        break;
+    }
+  };
 
   useEffect(() => {
     fetchDocsData();
@@ -129,7 +130,7 @@ const Index = () => {
         </div>
 
         <div style={{ paddingTop: 8, borderTop: `1px solid ${token.colorBorderSecondary}` }}>
-          <Dropdown menu={{ items: menuItems }} arrow>
+          <Dropdown menu={{ items: menuItems, onClick: onClickDropdownItem }} arrow>
             <Flex align="center" gap={8} style={{ height: 40, cursor: 'pointer' }}>
               <Avatar style={{ backgroundColor: getAvatarColor(username) }}>
                 {username.charAt(0)}
